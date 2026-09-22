@@ -1,0 +1,307 @@
+{
+  "name": "ICN292-Lab3-Tapia-Joaquin - resumen",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 23,
+              "triggerAtMinute": 55
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "14c37872-dd8b-4194-afac-395aad238001",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "4D8LLUbdbj7Y4Bby",
+          "mode": "list",
+          "cachedResultName": "ICN292_Lab3_Tapia_Joaquin_registro",
+          "cachedResultUrl": "/projects/AJ56ih1r2lCfDJFU/datatables/4D8LLUbdbj7Y4Bby"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "fecha",
+              "keyValue": "={{ $now.setZone('America/Santiago').toISODate() }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "51c81ce8-1a84-46b0-b31c-979797fcf00c",
+      "name": "Leer registro",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "field": "id_solicitud"
+            },
+            {
+              "aggregation": "sum",
+              "field": "monto"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "ruta",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "0e4fb73e-cfcb-4b4f-a2d8-5551fdc8da90",
+      "name": "Por ruta"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ea3c8c01-5397-49d0-befa-5bf322376881",
+              "name": "linea",
+              "value": "={{ $json.ruta }}: {{ $json.count_id_solicitud }} solicitudes, ${{ $json.sum_monto.toLocaleString('es-CL') }}",
+              "type": "string"
+            },
+            {
+              "id": "dd0a9f58-9f33-448a-94e4-bec1ada6a1b9",
+              "name": "cantidad",
+              "value": "={{ $json.count_id_solicitud }}",
+              "type": "number"
+            },
+            {
+              "id": "fe47ea76-fa35-49f3-af06-bbb3d873bcec",
+              "name": "monto",
+              "value": "={{ $json.sum_monto }}",
+              "type": "number"
+            },
+            {
+              "id": "1242006a-f361-473e-9cb1-e8563ce87e93",
+              "name": "aprobadas",
+              "value": "={{ $json.ruta === 'APROBACION' ? $json.count_id_solicitud : 0 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        0
+      ],
+      "id": "7035fbf0-892a-4c7f-b244-4b44228b643a",
+      "name": "Linea por ruta"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "linea",
+              "separateBy": "\n"
+            },
+            {
+              "aggregation": "sum",
+              "field": "cantidad"
+            },
+            {
+              "aggregation": "sum",
+              "field": "monto"
+            },
+            {
+              "aggregation": "sum",
+              "field": "aprobadas"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        0
+      ],
+      "id": "03b8d1a1-b0f9-4a18-9ba1-54139c3dbba9",
+      "name": "Total del dia"
+    },
+    {
+      "parameters": {
+        "fromEmail": "devoluciones@andeshogar.example",
+        "toEmail": "servicioalcliente@andeshogar.example",
+        "subject": "=Resumen diario de devoluciones {{ $now.setZone('America/Santiago').toFormat('dd-MM-yyyy') }}",
+        "emailFormat": "text",
+        "text": "=Resumen del día {{ $now.setZone('America/Santiago').toFormat('dd-MM-yyyy') }}\n\nSolicitudes y monto por ruta:\n{{ $json.sum_cantidad > 0 ? $json.concatenated_linea : 'No se registraron solicitudes en el día.' }}\n\nTotal de solicitudes: {{ $json.sum_cantidad }}\nMonto total del día: ${{ $json.sum_monto.toLocaleString('es-CL') }}\nTasa de aprobación automática: {{ $json.sum_cantidad > 0 ? ($json.sum_aprobadas / $json.sum_cantidad * 100).toFixed(1) : 0 }} %",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "3810e70e-d848-4695-81c1-33fe6206b7d9",
+      "name": "Enviar resumen",
+      "webhookId": "9b5f0b59-3acc-4dbd-8f53-487ab85930ad",
+      "credentials": {
+        "smtp": {
+          "id": "UorpgrEG70o8T4R4",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        224
+      ],
+      "id": "66770ffa-bd1d-4d42-91ff-63161e24e823",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "fromEmail": "n8n@andeshogar.example",
+        "toEmail": "soporte@andeshogar.example",
+        "subject": "=Error en {{ $json.workflow.name }}",
+        "emailFormat": "text",
+        "text": "=Falló el flujo {{ $json.workflow.name }}.\n\nNodo con error: {{ $json.execution.lastNodeExecuted }}\nMensaje: {{ $json.execution.error.message }}\nEjecución: {{ $json.execution.id }} (modo {{ $json.execution.mode }})\nRevisar en: {{ $json.execution.url }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        224,
+        224
+      ],
+      "id": "96d44aa6-b762-4e2d-9ff2-798e6b2fab37",
+      "name": "Avisar error",
+      "webhookId": "1c4cac78-9427-4fe1-b177-2bf73f92e17e",
+      "credentials": {
+        "smtp": {
+          "id": "UorpgrEG70o8T4R4",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Leer registro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer registro": {
+      "main": [
+        [
+          {
+            "node": "Por ruta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Por ruta": {
+      "main": [
+        [
+          {
+            "node": "Linea por ruta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Linea por ruta": {
+      "main": [
+        [
+          {
+            "node": "Total del dia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Total del dia": {
+      "main": [
+        [
+          {
+            "node": "Enviar resumen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Avisar error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "America/Santiago",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "5pZ0GFGReH4vUXqE"
+  },
+  "versionId": "51047dee-c35e-4bc6-ac91-614bdabdbe7c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0707b4edab03f593395b5d704e28e6fefebdeaa5b660acc763c89b184081f6bd"
+  },
+  "nodeGroups": [],
+  "id": "5pZ0GFGReH4vUXqE",
+  "tags": []
+}

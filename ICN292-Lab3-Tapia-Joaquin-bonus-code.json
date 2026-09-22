@@ -1,0 +1,85 @@
+{
+  "name": "ICN292-Lab3-Tapia-Joaquin - bonus code",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Devoluciones-AndesHogarSpA-code",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7d874b4e-1df5-45e8-b832-4199daecae05",
+      "name": "Webhook",
+      "webhookId": "40780982-f3ba-4028-bfb9-6d63eea8b65a"
+    },
+    {
+      "parameters": {
+        "jsCode": "const U = 41000;\nconst D = 14;\n\nreturn $input.all().map(item => {\n  const s = item.json.body;\n  const monto = Number(s.monto);\n  const dias = Number(s.dias_desde_compra);\n  let ruta = 'APROBACION';\n  let motivo = 'Monto dentro de U, en plazo y sin causal de rechazo o revision';\n  \n  if (!s.id_solicitud) { ruta = 'DATOS INVALIDOS'; motivo = 'Falta id_solicitud'; }\n  else if (Number.isNaN(monto) || Number.isNaN(dias)) { ruta = 'DATOS INVALIDOS'; motivo = 'Monto o dias no numericos'; }\n  else if (monto <= 0) { ruta = 'DATOS INVALIDOS'; motivo = 'Monto no mayor que cero'; }\n  else if (dias > D) { ruta = 'RECHAZO'; motivo = 'Fuera de plazo: mas de ' + D + ' dias'; }\n  else if (s.estado_producto === 'danado_por_uso') { ruta = 'RECHAZO'; motivo = 'Producto danado por uso'; }\n  else if (monto > U) { ruta = 'REVISION'; motivo = 'Monto mayor que U (' + U + ' CLP)'; }\n  else if (s.estado_producto === 'con_fallas') { ruta = 'REVISION'; motivo = 'Producto con fallas'; }\n  \n  return { json: { id_solicitud: s.id_solicitud, sku: s.sku, monto, dias_desde_compra: dias, estado_producto: s.estado_producto, ruta, motivo, U, D } };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "7ac4c3d4-62a7-43f7-aa22-615b7214c819",
+      "name": "Clasificar"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "d01dca3f-49d4-4722-965e-e263acdb656a",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Clasificar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clasificar": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5e2bb9bb-eb99-49aa-81bd-183833c853fa",
+  "meta": {
+    "instanceId": "0707b4edab03f593395b5d704e28e6fefebdeaa5b660acc763c89b184081f6bd"
+  },
+  "nodeGroups": [],
+  "id": "KU6N8osxjhZksSK8",
+  "tags": []
+}
