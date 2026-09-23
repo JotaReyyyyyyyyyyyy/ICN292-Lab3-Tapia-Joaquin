@@ -4,6 +4,7 @@ Laboratorio 3 de ICN-292 Sistemas de Información para la Gestión (USM, Campus 
 Triage de las solicitudes de devolución de Andes Hogar SpA, automatizado en n8n.
 
 - Nombre: Joaquín Tapia Mandiola
+- RUT: 21.407.361-7
 - Semilla: S = 361, por lo que U = 41.000 y D = 14
 - Fecha: 22-09-2026
 
