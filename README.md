@@ -11,10 +11,13 @@ Triage de las solicitudes de devolución de Andes Hogar SpA, automatizado en n8n
 
 | Archivo | Contenido |
 |---|---|
+| `ICN292-Lab3-Tapia-Joaquin.pdf` | Informe |
+| `ICN292-Lab3-Tapia-Joaquin.tex` | Fuente del informe. Compila con pdflatex y necesita `Logo usmUSM.png` y la carpeta `evidencias/` |
 | `ICN292-Lab3-Tapia-Joaquin-triage.json` | Flujo principal: Webhook, Switch en modo Rules, Edit Fields por ruta, consulta de la UF, registro, aviso al cliente y respuesta |
 | `ICN292-Lab3-Tapia-Joaquin-emisor.json` | Envía las 15 solicitudes por POST al webhook del triage |
 | `ICN292-Lab3-Tapia-Joaquin-resumen.json` | Resumen diario (Schedule Trigger + Summarize) y Error Workflow |
 | `ICN292-Lab3-Tapia-Joaquin-bonus-code.json` | Bonus: las mismas reglas en un único nodo Code |
+| `ICN292-Lab3-Tapia-Joaquin-bonus-code.js` | El código de ese nodo, para leerlo sin importar el flujo |
 | `evidencias/` | Capturas de las ejecuciones con el panel de nodo, entrada y salida |
 
 ## Cómo reproducir
